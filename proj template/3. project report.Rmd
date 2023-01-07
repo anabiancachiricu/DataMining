@@ -1,0 +1,649 @@
+---
+title: "Classification tehniques II: logistic regression, LDA & QDA "
+author:
+- name: Chiricu Ana-Bianca (Gr 405)
+- name: Poinarita Andreea-Diana (Gr 405)
+date: "`r format(Sys.time(), '%d %B %Y')`"
+output: 
+  html_document:
+    highlight: pygments
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(include = TRUE, echo = TRUE)
+```
+
+## **1. Regresia logistica** 
+
+
+##### *Definitie*
+Regresia logistica este o metoda potrivita pentru a modela relatia dintre o multime de variabile independente X si o variabila dependenta, binara, Y, reprezentand apartenenta la doua clase/categorii – da/nu, prezent/absent, adevarat/fals.
+Din acest motiv, putem "coda" valorile lui Y cu 0 sau 1, valoarea 1 reprezentand aparitia/realizarea evenimentului respectiv.
+Prin urmare, scopul este gasirea probabilitatii de producere a evenimentului in functie de valorile variabilelor independente X. 
+
+In cazul in care exista un singur predictor/variabila independenta, modelul se bazeaza pe functia logistica urmatoare: 
+<center>
+![](D:/BDTS-Master/DM/proj template-20230107T114239Z-001/proj template/Fig4.2-pg134.png)
+(figura 4.2, pg. 134).
+
+Aceasta functie genereaza o valoare dependenta in intervalul (0,1) pentru orice valoare arbitrara a variabilei independente, reprezentand, de fapt, probabilitatea de incadrare a valorii independente in una din cele doua categorii ale variabilei dependente.
+
+Pentru a se antrena modelul, se foloseste o metoda numita probabilitate maxima (maximum likelihood), 
+adica estimam valorile coeficientilor b0 si b1 astfel incat p(X) are o valoare cat mai aproape de 1 pentru success si cat mai aproape de 0 in caz de esec.
+Dupa stabilirea coeficientilor, se pot face predictii/ se poate calcula probabilitatea.
+
+De asemenea, pe baza functiei logistice, exista o notiune numita "odds" (raport de sanse) care este, de fapt, probabilitatea de succes(1) impartita la probabilitatea de esec (0):
+
+<center>
+![](D:/BDTS-Master/DM/proj template-20230107T114239Z-001/proj template/Fig4.3-pg134.png)
+(figura 4.3, pg. 134)
+
+In general, regresia logistica este un model folosit pentru 2 clase, insa se poate extinde/generaliza la mai multe clase, adica Multinomial Logistic Regression.
+
+
+In limbajul R:
+- un model se poate antrena astfel,  folosind functia glm.fits:
+** 
+```
+ glm.fits <- glm (Direction ~ (Lag1 + Lag2 + Lag3 + Lag4 + Lag5 + Volume) ,data = Smarket , family =binomial)
+```
+- coeficientii gasiti se pot vizualiza prin functia coef (glm.fits)
+```
+coef(glm.fits)
+```
+- rezultatul poate fi gasit prin folosirea functiei predict
+```
+glm.probs <- predict (glm.fits , type = " response ")
+glm.probs[1:10]
+```
+## **2. LDA**
+##### *Definitie*
+
+LDA for p=1:
+
+- estimarea fk(X) largest
+- e liniar pentru ca (figura 4.18 pg 143) e o functie liniara
+<center>
+![](D:/BDTS-Master/DM/proj template-20230107T114239Z-001/proj template/Fig4.18-pg134.png)
+
+- Limita de decizie: este unctul pentru care δ1(x) = δ2(x);
+ 
+ Metoda analizei discriminante liniară (LDA) aproximează clasificatorul Bayes prin introducerea estimărilor pentru πk, µk și σ2 în (4.18).
+
+
+LDA for p>1: 
+<center>
+![](D:/BDTS-Master/DM/proj template-20230107T114239Z-001/proj template/Fig4.24-pg146.png)
+(figura 4.24. pagina146)
+
+- LDA presupune că observațiile din cadrul fiecărei clase sunt extrase dintr-o distribuție Gaussiană multivariată cu un vector mediu specific clasei și o matrice de covarianță care este comună tuturor claselor K.
+
+```
+LDA: lda.fit <- lda
+```
+
+## **3. QDA**
+##### *Definitie*
+
+- functia quadratica de aici si numele
+<center>
+![](D:/BDTS-Master/DM/proj template-20230107T114239Z-001/proj template/Fig4.28-pg153.png)
+ 
+ La fel ca LDA, clasificatorul QDA rezultă din presupunerea că observațiile din fiecare clasă sunt extrase dintr-o distribuție Gaussiană și din introducerea estimărilor pentru parametri în teorema lui Bayes pentru a realiza predicția.
+ Cu toate acestea, spre deosebire de LDA, QDA presupune că fiecare clasă are propria sa matrice de covarianță.
+ <center>
+ 
+ ```
+ QDA: qda.fit <- qda
+ ```
+
+## **4. Comparatie**
+
+* LDA este un clasificator mult mai puțin flexibil decât QDA și
+deci are o varianță substanțial mai mică. Acest lucru poate duce la îmbunătățirea
+performanța de predicție. Dar există un compromis: dacă LDA presupune că
+clasele K au o matrice de covarianță comună, atunci LDA
+poate suferi de un bias mare. În linii mari, LDA tinde să fie o varianta mai buna
+decât QDA dacă există relativ puține observații de antrenament și astfel reducerea
+varianței este crucială. În schimb, QDA este recomandat dacă setul de antrenament este
+foarte mare, astfel încât varianța clasificatorului să nu fie o preocupare majoră, sau dacă
+ipoteza unei matrice de covarianță comună pentru clasele K este clară
+de nesuportat.
+
+* LDA si QDA sunt potrivire pentru raspunsuri calitative dar care au mai multe clase
+
+* LDA & QDA: se bazeaza pe means si pe variance
+
+* Represia logistica este potrivita in special pentru clasificarile cu doua clase sau binare. Asa cum am mentionat anterior, aceasta poate fi extinsa pentru clasificarea cu mai multe clase, dar este rar folosit astfel.
+
+* Regresia logistica poate sa fie instabila atunci cand clasele sunt bine separate sau cand exista putine exemple din care sa fie estimati coeficientii/parametri.
+
+## **5. Exercitii**
+##### *1. Cerinta:*
+
+<center>
+![](D:/BDTS-Master/DM/proj template-20230107T114239Z-001/proj template/Ex1.png)
+
+##### *1. Rezolvare:*
+
+$$ \begin{aligned}
+    P(x)(1+^{\beta_0 + \beta_1x}) &= e^{\beta_0 + \beta_1x}\\
+    \frac{P(x)}{\frac{1}{1 + e^{\beta_0 + \beta_1x}}} &= e^{\beta_0 + \beta_1x}\\
+    \frac{P(x)}{1 - \frac{e^{\beta_0 + \beta_1x}}{1+ e^{\beta_0 + \beta_1x}}} &= e^{\beta_0 + \beta_1x}\\
+    \frac{P(x)}{1 - P(x)} &= e^{\beta_0 + \beta_1x}\\
+  \end{aligned} $$ 
+
+##### *2. Cerinta:*
+<center>
+![](D:/BDTS-Master/DM/proj template-20230107T114239Z-001/proj template/Ex2.png)
+
+##### *2. Rezolvare:*
+
+  Termenii din (4.12) care nu variaza in functie de $k$:
+  
+  $$ C = \frac{\frac{1}{\sqrt{2\pi}\sigma}\exp(-1/2\sigma^2x^2)}{\sum_l\pi_l\frac{1}{\sqrt{2\pi}\sigma}\exp(-1/2\sigma^2(x-\mu_l)^2)}$$
+  Inlocuim C in (4.12):
+  
+  $$ P_k(x) = \pi_kC\exp(\frac{1}{2\sigma^2}(2\mu_kx - \mu_k^2))$$
+  
+  Aplicam logaritm in ambele parti:
+  
+  $$ \log(P_k(x)) = \log(\pi_k) + \log(C) + \frac{1}{2\sigma^2}(2\mu_kx - \mu_k^2) $$
+  Rearanjam ecuatia:
+  
+  $$ \delta_k(x) = x\frac{\mu_k}{\sigma^2}-\frac{\mu_k^2}{2\sigma^2}+\log(\pi_k) $$
+  
+##### *3. Cerinta:*
+<center>
+![](D:/BDTS-Master/DM/proj template-20230107T114239Z-001/proj template/Ex3.png)
+
+##### *3. Rezolvare:*
+
+Înlăturând ipoteza termenilor de varianță partajați în toate clasele K, termenii din (4.12) care nu variază cu $k$:
+  
+  $$ C' = \frac{\frac{1}{\sqrt{2\pi}}}{\sum_l\pi_l\frac{1}{\sqrt{2\pi}\sigma_l}\exp(-1/2\sigma_l^2(x-\mu_l)^2)} $$
+  
+  Inlocuim $C'$ in (4.12) si logaritmam:
+  
+  $$\begin{aligned}
+  P_k(x) &= C'\frac{\pi_k}{\sigma_k}\exp(-\frac{1}{2\sigma^2}(x^2-2\mu_kx + \mu_k^2))\\
+  \log(P_k(x)) &= -\frac{1}{2\sigma_k^2}x^2 + \frac{\mu_kx}{\sigma_k^2} - \frac{\mu_k^2}{2\sigma_k^2} + \log(\frac{\pi_k}{\sigma_k}) + \log(C')      
+  \end{aligned}$$
+  
+  Dupa cum se poate vedea din prezenta lui $x^2$ in termenul final, discriminantul nu este liniar.
+
+##### *4.a. Cerinta:*
+<center>
+![](D:/BDTS-Master/DM/proj template-20230107T114239Z-001/proj template/Ex4.1.png)
+<center>
+![](D:/BDTS-Master/DM/proj template-20230107T114239Z-001/proj template/Ex4.2.png)
+*4.a. Rezolvare:*
+
+ Într-o distribuție uniformă, toate intervalele de aceeași lungime au aceeasi probabilitate. Presupunem $x\in[0,05, 0,95]$, si intervalele: $[x-0,05, x+0,05]$, avnd $lungime=0,1$.
+  În medie, 10% dintre observații ar fi disponibile pentru a face o predicție pentru observația de test.
+
+##### *4.b. Cerinta:*
+<center>
+![](D:/BDTS-Master/DM/proj template-20230107T114239Z-001/proj template/Ex4b.png)
+##### *4.b. Rezolvare:*
+
+Presupunem $x\in[0.05, 0.95]$, $x1_{length} \times x2_{length} = 0.01$. Deci, 1% din observatiile disponibile ar fi folosite pentru realizarea unei predictii.  
+
+##### *4.c. Cerinta:*
+<center>
+![](D:/BDTS-Master/DM/proj template-20230107T114239Z-001/proj template/Ex4c.png)
+
+##### *4.c. Rezolvare:*
+
+Daca p=100; $0.1^p \times 100 = 0.1^{100} \times 100$ din observatii sunt disponibile.
+
+##### *4.d. Cerinta:*
+<center>
+![](D:/BDTS-Master/DM/proj template-20230107T114239Z-001/proj template/Ex4d.png)
+##### *4.d. Rezolvare:*
+
+Pe măsură ce numărul de predictori crește, fracția de observații disponibile pentru a face o predicție este redusă exponențial.
+
+##### *4.e. Cerinta:*
+<center>
+![](D:/BDTS-Master/DM/proj template-20230107T114239Z-001/proj template/Ex4e.png)
+
+##### *4.e. Rezolvare:*
+
+  $If p=1 ; d(length) = 0.1^{1/1} = 0.1$
+  
+  $If p=2 ; d(length) = 0.1^{1/2} = 0.32$
+  
+  $If p=100 ; d(length) = 0.1^{1/100} = 0.977$
+  
+  Pe măsură ce p crește, lungimea laturii converge la 1 și acest lucru arată că hipercubul centrat în jurul observației de test cu 10% din observația de test trebuie să aibă aproape aceeași dimensiune ca și hipercubul cu toate observațiile. 
+  De asemenea, arată că observațiile sunt „mai departe” de o observație de test pe măsură ce p crește; adică sunt concentrate lângă limita hipercubului.
+
+##### *5. Cerinta:*
+<center>
+![](D:/BDTS-Master/DM/proj template-20230107T114239Z-001/proj template/Ex5.png)
+
+##### *5. Rezolvare:*
+
+__(a)__
+
+  - LDA functioneaza mai bine pe date de test.
+  - QDA functioneaza mai bine pe date de antrenament (are mai multa flexibiliatte la potrivirea datelor), dar mai rau pe date de test din cauza cresterii variantei.
+  
+__(b)__
+
+  - QDA functioneaza mai bine pe date de antrenament si de test.
+
+__(c)__
+
+  - În general, QDA tinde să fie mai bun decât LDA atunci când dimensiunea eșantionului este mare și unde nu există o covarianță comună între clase. Ca atare, ar fi de asteptat ca QDA să ofere o potrivire mai bună și astfel să ofere predicții mai bune.
+  
+__(d)__
+
+  - Fals: LDA va oferi probabil o potrivire mai bună pentru o limită de decizie liniară decât QDA și, prin urmare, va oferi o rată de eroare de testare mai bună. QDA ar putea oferi un model supra-adaptat (datorită flexibilității mai mari) care funcționează bine pe setul de antrenament, dar mai rău pe setul de testare (datorită variației mai mari).
+  
+##### *6. Cerinta:*
+<center>
+![](D:/BDTS-Master/DM/proj template-20230107T114239Z-001/proj template/Ex6.png)
+
+  
+##### *6. Rezolvare:*
+
+__(a)__
+
+$$
+\begin{aligned}
+P(X) &= \frac{\exp(\hat\beta_0 + \hat\beta_1X_1 + \hat\beta_2X_2)}{1 + \exp(\hat\beta_0 + \hat\beta_1X_1 + \hat\beta_2X_2)}\\
+P(X) &= \frac{\exp(-0.5)}{1+\exp(-0.5)} = 0.38 
+\end{aligned}
+$$
+  
+__(b)__ 
+
+$$
+\begin{aligned}
+\log(\frac{P(X)}{1 - P(X)}) &= \hat\beta_0 + \hat\beta_1X_1 + \hat\beta_2X_2\\
+\log(\frac{0.5}{1 - 0.5}) &= -6 + 0.05X1 + 3.5\\
+X_1 &= 50 hours. 
+\end{aligned}
+$$
+
+##### *7. Cerinta:*
+<center>
+![](D:/BDTS-Master/DM/proj template-20230107T114239Z-001/proj template/Ex7.png)
+
+##### *7. Rezolvare:*
+
+$$\begin{aligned}
+P(Y=yes|X=4) &= \frac{\pi_{yes}f_{yes}(x)}{\sum_{l=1}^K \pi_lf_l(x)} = \frac{\pi_{yes}\exp(-1/2\sigma^2(x-\mu_{yes})^2)}{\sum_{l=1}^K\pi_l\exp(-1/2\sigma^2(x-\mu_l)^2)}\\
+P(Y=yes|X=4) &= \frac{0.8\times\exp(-0.5)}{0.8\times\exp(-0.5) + 0.2\times\exp(-16/72)}\\
+P(Y=yes|X=4) &= 0.75
+\end{aligned}$$
+
+##### *8. Cerinta:*
+<center>
+![](D:/BDTS-Master/DM/proj template-20230107T114239Z-001/proj template/Ex8.1.png)
+<center>
+![](D:/BDTS-Master/DM/proj template-20230107T114239Z-001/proj template/Ex8.2.png)
+
+##### *8. Rezolvare:*
+
+Modelul KNN cu K=1 s-ar potrivi exact setului de antrenament și astfel eroarea de antrenament ar fi zero. Aceasta înseamnă că eroarea de testare trebuie să fie de 36% pentru ca media erorilor să fie de 18%. Deoarece selecția modelului se bazează pe performanța setului de testare, vom alege regresia logistică pentru a clasifica noile observații.
+
+
+##### *9. Cerinta:*
+<center>
+![](D:/BDTS-Master/DM/proj template-20230107T114239Z-001/proj template/Ex9.png)
+
+##### *9. Rezolvare:*
+
+__(a)__
+
+$$
+\begin{aligned}
+Odds &= \frac{P(X)}{1-P(X)}\\
+P(X) &= \frac{0.37}{1.37} = 0.27 
+\end{aligned}$$
+
+  - 27% of people with odds of 0.37 will default.
+  
+
+__(b)__
+
+$$Odds = \frac{0.16}{1-0.16}=0.19$$
+
+##### *10. Cerinta:*
+<center>
+![](D:/BDTS-Master/DM/proj template-20230107T114239Z-001/proj template/Ex10.png)
+
+##### *10. Rezolvare:*
+
+If we reduce the dimensionality of p to p=1, it reduces the inverse of the covariance matrix Σ−1(X) to a scalar of the inverse of the variance 1σ2(x) and the matrices with x reduce to vectors of diagonal matrix of values σ2(x), where x is the difference between the mean of the class weighting μk and the mean across all classes, μK. This reduces the sum of all bkj across j to just bk, since there is only one feature. Thus,
+
+Daca reducem dimensionaliatatea lui p la p=1, se reduce si inversul matricei de covarianta  Σ−1(X) la un scalar al inversului varianței 1σ2(x) și matricele cu x se reduc la vectori ai matricei diagonale a valorilor σ2(x), unde x este diferența dintre media ponderii clasei μk și media tuturor claselor, μK.
+
+Aceasta reduce suma tuturor bkj de pe j la doar bk, deoarece există o singură caracteristică. Prin urmare,
+<center>
+$log(Pr(Y=k∣X=x)Pr(Y=K∣X=x)$
+
+$=log(πkfk(x)πKfK(x))$
+
+$=log(πkπK)−12σ^2(x−μk)^2+12σ^2(x−μK)^2$
+
+$=log(πkπK)−12σ^2(μ^2k−μ^2K)+1σ^2(μk−μK)x$
+
+Definirea variabilelor bazate pe ecuatia (4.32) ajunge la: 
+<center>
+$ak=log(πkπK)−12σ2(μk−μK)$ 
+and
+$bk=1σ2(μk−μK)$.
+
+##### *11. Cerinta:*
+<center>
+![](D:/BDTS-Master/DM/proj template-20230107T114239Z-001/proj template/Ex11.png)
+
+##### *11. Rezolvare:*
+$log(Pr(Y=k|X=x)Pr(Y=K|X=x))=ak+∑pj=1bkjxj+∑pj=1∑pl=1ckjlxjxl $
+
+Deci,
+
+$ak=log(πkπK)$
+
+$bkj=log(bkjxjbKxj)$
+
+$ckjl=log(ckjlxjxlcKjlxjxl)$
+
+
+##### *12. Cerinta:*
+<center>
+![](D:/BDTS-Master/DM/proj template-20230107T114239Z-001/proj template/Ex12.1.png)
+<center>
+![](D:/BDTS-Master/DM/proj template-20230107T114239Z-001/proj template/Ex12.2.png)
+##### *12. Rezolvare:*
+
+__(a)__
+Luând logul sanselor date prin manipularea formulei date pentru a se potrivi cu forma ecuației (4.3) pentru Prˆ(portocale) dă logul sanselor pentru această clasificare binară simplă, deoarece toate celelalte sanse posibile sunt mere:
+
+$logodds(Prˆ(Y= orange ∣X=x))=β^0+β^1x$
+
+__(b)__
+Deoarece prietenul adoptă abordarea softmax, împărțim șansele de portocale la șansele de mere folosind ecuația sa (cu numitorii anulați):
+
+$odds(Prˆ(Y= orange ∣X=x)Prˆ(Y= apple ∣X=x))=exp(α^{orange}_0 +α^{orange}_1 x)exp(α^{apple}_0 +α^{apple}_1 x)$
+Logaritmam:
+$logodds(Prˆ(Y= orange ∣X=x)Prˆ(Y= apple ∣X=x))=α^orange0 +α^orange1 x−α^apple0 −α^apple1 x$
+
+__(c)__
+Modelul prietenului ar trebui să aibă valori pentru a^ care sunt apropiate de valorile noastre, conform acestor relații:
+
+$β0^≈α^orange0 −α^apple0$
+
+$β1^≈α^orange1 −α^apple1 $
+
+__(d)__
+$β0^≈1.5−3.6=−2.1 $
+$β1^≈−2.4−0.8=−3.2 $
+
+
+__(e)__
+Dacă modelele prezic același lucru, ele ar trebui sa coincida 100% din timp, deoarece relațiile găsite în ecuația (4.14) sunt echivalente din punct de vedere matematic cu valorile estimate folosind cotele non-softmax log.
+
+## **6. Aplicatii**
+##### *13. Cerinta:*
+<center>
+![](D:/BDTS-Master/DM/proj template-20230107T114239Z-001/proj template/Ex13.png)
+##### *13. Rezolvare:*
+
+__(a)__
+
+```{r}
+library(ISLR)
+summary(Weekly)
+```
+
+  
+  
+```{r}
+# Scatterplot matrix.
+pairs(Weekly[,1:8])
+```
+  
+```{r}
+# Correlation matrix.
+cor(Weekly[,1:8])
+```
+  
+  - As can be seen on the scatterplot and correlation matrices, there appears to be a positive correlation between 'Year' and 'Volume' only. From the summary statistics, we can observe that the Lag variables are very similar to each other and 'Today'. There doesn't appear to to be any patterns except for an increase in volume from 1989 to 2001.
+  
+__(b)__ __(c)__
+
+```{r}
+logistic_fit = glm(Direction ~ Lag1+Lag2+Lag3+Lag4+Lag5+Volume, data=Weekly, family=binomial)
+summary(logistic_fit)
+```
+  
+  - Lag2 is statistically significant.
+  
+```{r}
+logistic_probs = predict(logistic_fit, type="response")
+logistic_preds = rep("Down", 1089) # Vector of 1089 "Down" elements.
+logistic_preds[logistic_probs>0.5] = "Up" # Change "Down" to up when probability > 0.5.
+# Confusion matrix
+attach(Weekly)
+table(logistic_preds,Direction)
+```
+  
+  - The fraction of days where the predictions are correct is 611/1089 = 56%. Therefore, the training error rate is 48%. Of the 987 "Up" predictions the model makes, it is correct 557/987 = 56.4% of the time. Given that there were 605/1089 = 55.6% "Up" days, the model's accuracy when predicting "Up" is only slightly better than random guessing.
+
+  
+
+__(d)__
+
+```{r}
+# Training observations from 1990 to 2008.
+train = (Year<2009)
+# Test observations from 2009 to 2010.
+Test = Weekly[!train ,]
+Test_Direction= Direction[!train]
+# Logistic regression on training set.
+logistic_fit2 = glm(Direction ~ Lag2, data=Weekly, family=binomial, subset=train)
+# Predictions on the test set.
+logistic_probs2 = predict(logistic_fit2,Test, type="response")
+logistic_preds2 = rep("Down", 104) 
+logistic_preds2[logistic_probs2>0.5] = "Up" 
+# Confusion matrix.
+table(logistic_preds2,Test_Direction)
+```
+  
+  - The model makes correct predictions on 65/104= 62.5% of the days.
+
+__(e)__
+
+```{r}
+# Using LDA.
+library(MASS)
+lda_fit = lda(Direction ~ Lag2, data=Weekly, subset=train)
+#lda_fit
+# Predictions on the test set.
+lda_pred = predict(lda_fit,Test)
+lda_class = lda_pred$class
+# Confusion matrix.
+table(lda_class,Test_Direction)
+```
+
+  - The lda model makes correct predictions 65/104 = 62.5% of the days.
+
+__(f)__
+
+```{r}
+# Using QDA.
+qda_fit = qda(Direction ~ Lag2, data=Weekly, subset=train)
+qda_pred = predict(qda_fit,Test)
+qda_class = qda_pred$class
+table(qda_class,Test_Direction)
+```
+  - QDA model's TPR=1 and precision(correct predictions)=0.58, which is no better than guessing each day is "Up". 
+ 
+
+__(g)__
+
+```{r}
+# Using KNN
+library(class)
+set.seed(1)
+train_X = Weekly[train,3]
+test_X = Weekly[!train,3]
+train_direction = Direction[train]
+# Changing from vector to matrix by adding dimensions
+dim(train_X) = c(985,1)
+dim(test_X) = c(104,1)
+# Predictions for K=1
+knn_pred = knn(train_X, test_X, train_direction, k=1)
+table(knn_pred, Test_Direction)
+```
+  
+  - KNN with K=1 in correct in its predictions for 50% of the days.
+  
+##### *14. Cerinta:*
+<center>
+![](D:/BDTS-Master/DM/proj template-20230107T114239Z-001/proj template/Ex14.png)
+##### *14. Rezolvare:*
+
+
+##### *15. Cerinta:*
+<center>
+![](D:/BDTS-Master/DM/proj template-20230107T114239Z-001/proj template/Ex15.1.png)
+<center>
+![](D:/BDTS-Master/DM/proj template-20230107T114239Z-001/proj template/Ex15.2.png)
+##### *15. Rezolvare:*
+
+
+
+##### *16. Cerinta:*
+<center>
+![](D:/BDTS-Master/DM/proj template-20230107T114239Z-001/proj template/Ex16.png)
+##### *16. Rezolvare:*
+  
+  ```{r}
+#library(ISLR)
+#library(MASS)
+#library(class)
+boston_df = Boston
+#Add 1 to column if CRIM > median and 0 otherwise
+median_crim = median(Boston$crim)
+boston_df$crim01 = with(ifelse(crim>median_crim, 1, 0), data=Boston)
+```
+
+```{r}
+#Correlation between crim01 and other variables.
+cor(boston_df$crim01,boston_df)
+```
+
+
+```{r}
+#Training and Test sets
+require(caTools)
+set.seed(123)
+boston_sample = sample.split(boston_df$crim01, SplitRatio = 0.80)
+boston_train = subset(boston_df, boston_sample==TRUE) 
+boston_test = subset(boston_df, boston_sample==FALSE)
+```
+
+```{r}
+# Logistic regression using all variables except CHAS and crim(using crim can lead to perfect separation).
+boston_lr = glm(crim01 ~.-chas-crim , data=boston_train, family=binomial)
+summary(boston_lr)
+boston_probs = predict(boston_lr,boston_test, type="response")
+boston_preds = rep(0, length(boston_test$crim01))
+boston_preds[boston_probs>0.5] = 1
+actual = boston_test$crim01
+table(boston_preds, actual)
+```
+  - Test error rate of 9.8%. Same accuracy when predicting 0(crime below median) or 1(crime above median).
+  
+  
+```{r}
+# Logistic regression using zn, nox, dis, rad and ptratio. These variables were statistically significant in the previous model.
+boston_lr2 = glm(crim01 ~ zn+nox+dis+rad+ptratio, data=boston_train, family=binomial)
+boston_probs2 = predict(boston_lr2,boston_test, type="response")
+boston_preds2 = rep(0, length(boston_test$crim01))
+boston_preds2[boston_probs2>0.5] = 1
+actual = boston_test$crim01
+table(boston_preds2, actual)
+```
+
+  - Test error rises to 14.7% when using this subset.
+
+```{r}
+# LDA
+boston_lda = lda(crim01 ~.-chas-crim , data=boston_train)
+boston_preds2 = predict(boston_lda, boston_test)
+table(boston_preds2$class, actual)
+```
+
+   - Test error rate of 13.7%.
+
+```{r}
+# QDA
+boston_qda = qda(crim01 ~.-chas-crim , data=boston_train)
+boston_preds3 = predict(boston_qda, boston_test)
+table(boston_preds3$class, actual)
+```
+
+  - Test error rate of 9.8%. More accurate when predicting 0.
+```{r}
+#KNN
+#Training and Test sets without crim and chas
+boston_train2 = data.matrix(subset(boston_train,select=-c(crim,chas)))
+boston_test2 = data.matrix(subset(boston_test,select=-c(crim,chas)))
+train2_y = data.matrix(boston_train[,15])
+test2_y = data.matrix(boston_test[,15])
+```
+
+```{r}
+# KNN-1 and predictions
+boston_knn1 = knn(boston_train2, boston_test2, train2_y, k=1)
+table(boston_knn1, test2_y)
+```
+
+  - Test error rate of 4.9%.
+  
+```{r}
+# KNN-3 and predictions
+boston_knn2 = knn(boston_train2, boston_test2, train2_y, k=3)
+table(boston_knn2, test2_y)
+```
+  
+  - Higher test error rate of 6.9%.
+
+```{r}
+# KNN-10 and predictions
+boston_knn3 = knn(boston_train2, boston_test2, train2_y, k=10)
+table(boston_knn3, test2_y)
+```
+  - Much higher test error rate of 11.7%.
+  
+  - Higher K values result in the test error rate increasing. KNN-1 gives the best performance, therefore the Bayes decision boundary for the data set is likely non-linear.
+  - QDA and Logistic regression perform better than LDA but worse than KNN.
+ 
+```{r}
+#KNN-1 using indus, nox, age, dis, rad, tax (strongly correlated variables with crim01)
+boston_train3 = data.matrix(subset(boston_train,select=c(indus,nox,age,dis,rad,tax)))
+boston_test3 = data.matrix(subset(boston_test,select=c(indus,nox,age,dis,rad,tax)))
+boston_knn4 = knn(boston_train3, boston_test3, train2_y, k=1)
+table(boston_knn4, test2_y)
+```
+  - The test error is worse when using these variables.
+
+```{r}
+#KNN-2 using nox and rad - most statistically significant in the first logistic model.
+boston_train4 = data.matrix(subset(boston_train,select=c(nox,rad)))
+boston_test4 = data.matrix(subset(boston_test,select=c(nox,rad)))
+boston_knn5 = knn(boston_train4, boston_test4, train2_y, k=2)
+table(boston_knn5, test2_y)
+```
+
+ - Test error of 4%, which is the lowest among the tested models and subsets of variables. KNN with values of K=1,2 or 3 give the best results.
+
+
+# THANK YOU!
